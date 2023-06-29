@@ -10,33 +10,43 @@ library(sfnetworks)
 library(stplanr)
 library(sp)
 
-# using this at the first time of using tidycensus
+#### set working directory ####
 path2file <-
   "/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ"
 setwd(path2file)
 
-state_input = 'OR'
+# state_input = 'CA'
 
-state_tract_shapefile <- st_read(paste0('data/Network/', state_input, '/census_tracts_2017.geojson'))
-ccst_lookup <- fread('data/ccst_geoid_key_tranps_geo_with_imputation.csv')
-selected_ccst_lookup <- ccst_lookup %>% filter(st_code == state_input) %>% as_tibble()
-selected_geoid <- as.numeric(unique(selected_ccst_lookup$GEOID))
 
-state_tract_shapefile <- state_tract_shapefile %>% mutate(GEOID = as.numeric(GEOID))
-state_tract_shapefile <- state_tract_shapefile %>% filter(GEOID %in% selected_geoid)
+#### load input ####
+# load census tract shapefile
+state_tract_shapefile <- st_read(paste0('data/Network/combined/combined_tracts/combined_tracts.shp'))
+# 73,056 census tracts
+
+# load OD with missing routes
+OD_to_impute <- fread(paste0('data/Network/combined/OD_to_impute_spillover.csv'))
+
+# generate census tract centroid geometry
 state_tract_shapefile <- st_transform(state_tract_shapefile, crs = 4326) # convert to route CRS
-# plot(st_geometry(state_tract_shapefile))
-
 tract_centroid <- st_centroid(state_tract_shapefile)
 tract_centroid <- tract_centroid %>% select(GEOID)
-plot(st_geometry(tract_centroid))
+plot(st_geometry(tract_centroid)) # (optional) show the centroid file
 
-OD_to_impute <- fread(paste0('data/Network/', state_input, '/OD_to_impute.csv'))
+# format census tract ID in OD file
+OD_to_impute <- OD_to_impute %>%
+  mutate(home_GEOID = str_pad(home_GEOID, 11, pad = "0"), 
+         destination = str_pad(destination, 11, pad = "0"))
+
+
+### split data frame into n equal-sized data frames to generate routes (so that each output geojson file is not too large)
+# to Carlos: it will be helpful if you can parallelize this part using 'foreach' and 'doparallel' functions
+# useful instructions: https://www.blasbenito.com/post/02_parallelizing_loops_with_r/
+
 #define number of data frames to split into
 n <- 100
-
-#split data frame into n equal-sized data frames
 OD_chunks = split(OD_to_impute, factor(sort(rank(row.names(OD_to_impute))%%n)))
+
+# generate routes for each data frame chunk
 i = 0
 for (chunks in OD_chunks){
   print(i)
@@ -44,16 +54,11 @@ for (chunks in OD_chunks){
   #   i = i + 1
   #   next
   # }
-  for (row in 1:nrow(chunks)) {
-    # if(row < 290){
-    #   next
-    # }
-    # if (row %in% exception){
-    #   next
-    # }
-    
-    origin_tract <- as.numeric(chunks$home_GEOID[row])
-    dest_tract <- as.numeric(chunks$destination[row])
+  for (row in 1:nrow(chunks)) { 
+    # loop through each O-D pair and query routes using function 'route_osrm' (openstreetmap router)
+    # more info about the router: https://docs.ropensci.org/stplanr/reference/route_osrm.html
+    origin_tract <- as.character(chunks$home_GEOID[row])
+    dest_tract <- as.character(chunks$destination[row])
     origin_node <- tract_centroid %>% filter(GEOID == origin_tract)
     dest_node <- tract_centroid %>% filter(GEOID == dest_tract)
     start_node_coordinate <- st_coordinates(origin_node)
@@ -64,11 +69,6 @@ for (chunks in OD_chunks){
       paths_sf <- st_transform(paths_sf, crs = 4326)
       paths_sf$source <- origin_tract
       paths_sf$destination <- dest_tract
-      # paths_sf <- paths_sf$geometry
-      # paths_sf <- st_sf(paths_sf)
-      # paths_sf$route_id <- route_id
-      # paths_sf$origin_faf <- as.numeric(origin_node$FAF)
-      # paths_sf$dest_faf <- as.numeric(dest_node$FAF)
       if (row == 1){
         out_route <- paths_sf
       }else{
