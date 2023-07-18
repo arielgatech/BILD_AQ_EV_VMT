@@ -21,7 +21,8 @@ import dask.dataframe as dd
 plt.style.use('ggplot')
 
 # set working directory
-path_to_prj = os.getcwd()
+path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
+# path_to_prj = os.getcwd()
 os.chdir(path_to_prj)
 
 # set current state for analysis
