@@ -66,6 +66,9 @@ distance_bin_label = ['bin1', 'bin2', 'bin3', 'bin4', 'bin5', 'bin6']
 print(list_of_states)
 nhb_vmt_by_tract_out = None
 
+vmt_grouping_var = ['home_GEOID', 'home_geotype', 'home_microtype', 
+                    'populationGroupType', 'destination']
+
 # allocate nhb VMT to out-of-state through tracts
 for st in list_of_states:
     
@@ -74,10 +77,14 @@ for st in list_of_states:
     hb_vmt_by_od_with_label.loc[hb_vmt_by_od_with_label['st_code'] == st]
     nhb_vmt_selected = \
         nhb_vmt_selected.drop(columns = ['VMT', 'geotype', 'microtype', 
-                                         'st_code','nhb_fraction_VMT'])
+                                         'st_code', 'nhb_fraction_VMT'])
+    # print(nhb_vmt_selected.columns)
     print('selected nhb VMT to assign in state ' + st)
     print(nhb_vmt_selected.nhb_VMT.sum())
-        
+    
+    # vmt_to_check= \
+    #     nhb_vmt_selected.groupby(vmt_grouping_var)['nhb_VMT'].mean()
+    # print(vmt_to_check.sum())   
     # load distance matrix for selected states
     dist_matrix = \
     read_csv('Network/combined/distance_matrix_by_tracts_' + st + '.csv')
@@ -93,7 +100,7 @@ for st in list_of_states:
                                             labels = distance_bin_label,
                                             ordered = False)
     dist_matrix = dist_matrix.loc[dist_matrix['st_code'] == st]
-    dist_matrix = dist_matrix.drop(columns = ['Unnamed: 0', 'st_code'])
+    dist_matrix = dist_matrix.drop(columns = ['Unnamed: 0'])
     
     # rename columns before join
     dist_matrix = \
@@ -105,6 +112,9 @@ for st in list_of_states:
         pd.merge(nhb_vmt_selected, dist_matrix,
                  on = 'destination',
                  how = 'left')
+    # vmt_to_check= \
+    #     nhb_vmt_selected.groupby(['home_GEOID', 'destination'])['nhb_VMT'].mean()
+    # print(vmt_to_check.sum())
     nhb_vmt_selected = \
         pd.merge(nhb_vmt_selected, nhb_vmt_assignment_rate,
                  left_on = ['thru_geotype', 'thru_microtype', 'dist_bin'],
@@ -121,11 +131,18 @@ for st in list_of_states:
         nhb_vmt_selected.loc[:, 'lm_all_tract']
     nhb_vmt_selected.loc[:, 'vmt_fraction'] = \
         nhb_vmt_selected.loc[:, 'vmt_fraction'] / \
-            nhb_vmt_selected.groupby(['home_GEOID', 'destination'])['vmt_fraction'].transform('sum')
+            nhb_vmt_selected.groupby(vmt_grouping_var)['vmt_fraction'].transform('sum')
     nhb_vmt_selected.loc[:, 'nhb_VMT'] *= \
         nhb_vmt_selected.loc[:, 'vmt_fraction'] 
+    nhb_vmt_selected.loc[:, 'nhb_VMT'] = \
+        np.round(nhb_vmt_selected.loc[:, 'nhb_VMT'], 0)
+    nhb_vmt_selected = nhb_vmt_selected.loc[nhb_vmt_selected['nhb_VMT']> 0]
     print('total nhb VMT after assignment:')
     print(nhb_vmt_selected.loc[:, 'nhb_VMT'].sum())
-    break
-
+    print('-------------------------------')
+    nhb_vmt_selected = \
+        nhb_vmt_selected.drop(columns = ['distance', 'dist_bin', 'vmt_fraction', 'lm_all_tract'])
+    nhb_vmt_by_tract_out = pd.concat([nhb_vmt_by_tract_out, nhb_vmt_selected])
+    # break
+nhb_vmt_by_tract_out.to_csv('Output/' + selected_state + '/nhb_vmt_spillover.csv')
 
