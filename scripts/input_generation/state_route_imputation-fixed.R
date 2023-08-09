@@ -20,6 +20,7 @@ library(parallel)
 library(foreach)
 library(doParallel)
 library(doSNOW)
+library(readr)
 
 #### Time the start of the execution
 
@@ -94,7 +95,7 @@ OD_to_impute <- OD_to_impute %>%
 ##### FOR TIME COMPLEXITY TESTING ONLY
 ##### 1000 routes
 
-# subset_OD <- OD_to_impute[1:500, ]
+subset_OD <- OD_to_impute[1:50, ]
 
 ### split data frame into n equal-sized data frames to generate routes (so that each output geojson file is not too large)
 
@@ -103,21 +104,21 @@ n <- 50
 OD_chunks = split(OD_to_impute, factor(sort(rank(row.names(OD_to_impute))%%n)))
 
 
-iterations <- 1000
+iterations <- 100
 pb <- txtProgressBar(max = iterations, style = 3)
 progress <-function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 
 library("doFuture")
 registerDoFuture()
-plan(multisession, workers = 8)
+plan(multisession, workers = 10)
 
 ### Time the start of the loop execution
 start_time_route_loop <- Sys.time()
 
 # generate routes for each data frame chunk
 foreach(i = 1:length(OD_chunks), .packages='sf') %dopar% {
-  j = 0
+  #j = 0
   for (row in 1:nrow(OD_chunks[[i]])) {
     cat(". Chunk:",i,";route:", row)
     # loop through each O-D pair and query routes using function 'route_osrm' (openstreetmap router)
@@ -147,10 +148,11 @@ foreach(i = 1:length(OD_chunks), .packages='sf') %dopar% {
     )
     # break
    
-  st_write(out_route, paste0('route/processed/imputed_', state_input, '_route_', i, '_', j, '.geojson'), append=FALSE)
-  j = j + 1
+  
+  # j = j + 1
   # break
   }
+  st_write(out_route, paste0('route/processed/imputed_', state_input, '_route_', i, '.geojson'), append=FALSE)
 }
 
 close(pb)
@@ -162,11 +164,18 @@ end_time_route_loop <- Sys.time()
 ### Rename the routes, format: 
 ### This is hard to do within the nested foreach/for loop due to global/local env issues on the package backend
 
-old_files <- list.files("route/processed", pattern = "*.geojson", full.names = TRUE)
-new_files <- paste0("route/processed/final/imputed_CA_route_",1:length(old_files),".geojson")
-file.copy(from = old_files, to = new_files)
+# old_files <- list.files("route/processed", pattern = "*.geojson", full.names = TRUE)
+# new_files <- paste0("route/processed/final/imputed_CA_route_",1:length(old_files),".geojson")
+# file.copy(from = old_files, to = new_files)
 #file.remove(old_files) if removing old files
 
+# library(dplyr)
+
+
+df <- list.files("route/processed", pattern = "*.geojson", full.names = TRUE) %>% 
+  lapply(st_read) %>% 
+  bind_rows 
+st_write(df, paste0('route/processed/final/imputed_CA_spillover_route.geojson'), append=FALSE)
 ### How long did the code take?
 elapsed_time <- end_time - start_time
 

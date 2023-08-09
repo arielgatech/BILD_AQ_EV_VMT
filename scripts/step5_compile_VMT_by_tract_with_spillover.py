@@ -211,21 +211,22 @@ state_VMT_spillover.columns = ['thru_GEOID', 'thru_geotype', 'thru_microtype',
 
 # <codecell>
 state_HMPS_by_home_tract = pd.concat([state_HMPS_by_home_tract, state_VMT_spillover])
-sample_HMPS_by_home_tract = state_HMPS_by_home_tract.head(1000)
-sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
+# sample_HMPS_by_home_tract = state_HMPS_by_home_tract.head(1000)
+# sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
 state_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_with_spillover.csv', index = False)
 print(state_HMPS_by_home_tract.head(5))
 
 # <codecell>
-
+sample_HMPS_by_home_tract = state_VMT_spillover.sample(1000)
+sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
 # plot final CA results with scaled spillover
 state_tract_file = 'census_tracts_2017.geojson'
 state_tracts_geojson =  gpd.read_file('Network/combined/' + state_tract_file)
 
 VMT_by_tract = \
-    state_HMPS_by_home_tract.groupby(['GEOID', 'geotype', 'microtype'])[['VMT']].sum()
+    state_HMPS_by_home_tract.groupby(['thru_GEOID', 'thru_geotype', 'thru_microtype'])[['VMT']].sum()
 VMT_by_tract = VMT_by_tract.reset_index()
-
+VMT_by_tract.columns = ['GEOID', 'geotype', 'microtype', 'VMT']
 # state_tracts_geojson.loc[:, 'GEOID'] = state_tracts_geojson.loc[:, 'GEOID'].astype(int)
 state_tracts_geojson = state_tracts_geojson.merge(VMT_by_tract, on='GEOID', how='inner')
 
