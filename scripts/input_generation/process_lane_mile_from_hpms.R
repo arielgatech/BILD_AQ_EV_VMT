@@ -8,12 +8,12 @@ census_api_key("d49f1c9b81751571b083252dfbb8ac14ae8b63b7", install = TRUE, overw
 #########
 readRenviron("~/.Renviron")
 
-setwd("/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/HPMS/GEMS_lane_mile")
-state = 'OR'
+setwd("/Volumes/LaCie/project_backup/GEMS/BILD-AQ/HPMS/")
+state = 'WY'
 # network_arnold <- fread(paste0(state, '/CA_arnold.csv'), h = T) # this data is not useful!!
 #  network_hpms <- fread(paste0(state, '/CA_summary.txt'), h = T)  # this data is not useful too!!
 
-hpms_geometry <- st_read(paste0(state, '/oregon2017/oregon2017.shp'))
+hpms_geometry <- st_read(paste0('HPMS data', '/wyoming2017/wyoming2017.shp'))
 crs_hpms <- st_crs(hpms_geometry)
 state_tracts = get_acs(
   geography = "tract",
@@ -36,7 +36,7 @@ hpms_geometry_by_tracts <- hpms_geometry_by_tracts %>% select(-variable, -estima
 
 hpms_geometry_by_tracts <- hpms_geometry_by_tracts %>% mutate(g_type = st_geometry_type(.))
 hpms_geometry_by_tracts <- hpms_geometry_by_tracts %>% filter(g_type %in% c('LINESTRING', 'MULTILINESTRING'))
-st_write(hpms_geometry_by_tracts, paste0(state, '/', state, '_HPMS_with_GEOID_LANEMILE.geojson'))
+st_write(hpms_geometry_by_tracts, paste0('output/', state, '_HPMS_with_GEOID_LANEMILE.geojson'))
 #plot(hpms_geometry_by_tracts[, 'GEOID'])
 
 
