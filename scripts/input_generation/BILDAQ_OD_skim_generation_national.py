@@ -38,7 +38,7 @@ microtype_label_short = microtype_label[['GEOID', 'st_code']]
 
 all_states = microtype_label_short.st_code.unique()
 
-processed_states = ['CA', 'TX', 'WA', 'OR', 'AZ', 'NY', 'NJ', 'IL']
+processed_states = ['CA', 'TX', 'WA', 'OR', 'AZ', 'NY', 'IL']
 for selected_state in all_states:
     if selected_state in processed_states:
         continue
