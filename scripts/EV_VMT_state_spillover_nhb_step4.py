@@ -23,7 +23,7 @@ path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmai
 os.chdir(path_to_prj)
 
 # set current state for analysis
-selected_state = 'CA'
+selected_state = 'OR'
 
 # path to model inputs
 nhb_vmt_generation_file = 'Input/spillover/NHTS_nonhome_VMT_generation_spillover.csv'
