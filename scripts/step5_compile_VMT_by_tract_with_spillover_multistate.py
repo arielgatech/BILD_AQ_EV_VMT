@@ -277,6 +277,7 @@ for selected_state in selected_states:
     print('writing output for ' + selected_state)
     state_HMPS_by_home_tract_out = \
         state_HMPS_by_home_tract.loc[state_HMPS_by_home_tract['State'] == selected_state]
+    print(state_HMPS_by_home_tract_out.VMT.sum())
     # sample_HMPS_by_home_tract = state_HMPS_by_home_tract.head(1000)
     # sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
     state_HMPS_by_home_tract_out.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_multistate_spillover.csv', index = False)
