@@ -15,13 +15,13 @@ import copy
 ##########################################################################################
 
 #work directory is where the I-O data are stored
-#work_dir = '/Volumes/GoogleDrive/My Drive/GEMS/BILD-AQ/deliverables'
-#os.chdir(work_dir)
+work_dir = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/deliverables'
+os.chdir(work_dir)
 plt.style.use('ggplot')
 sns.set(font_scale=1.2)  # larger font
 total_start_time = time.time()
 
-state_name = 'TX'
+state_name = 'CA'
 
 link_to_tempo_output = './Input/' + state_name + '/tract_output_nevi.csv'
 link_to_gems_output = './Input/' + state_name + '/BILDAQ_VMT_by_tract.csv'
@@ -154,7 +154,7 @@ for analysis_year in analysis_years:
         VMT_by_thru_tract_and_veh = VMT_by_thru_tract_and_veh.reset_index()
 
         # writing output VMT by tracts
-        VMT_by_thru_tract_and_veh.to_csv('./Output/'+ state_name + '/EV_VMT/raw_VMT_' + output_name + '_' + scenario_name + '.csv', index = False)
+        VMT_by_thru_tract_and_veh.to_csv('./Output/'+ state_name + '/EV_VMT/raw_VMT_' + output_name + '_' + scenario_name + '_old.csv', index = False)
         print(VMT_by_thru_tract_and_veh.head(5))
 
         VMT_by_thru_tract_and_veh['thru_GEOID'] = VMT_by_thru_tract_and_veh['thru_GEOID'].apply(lambda x: x.zfill(11))
