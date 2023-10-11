@@ -2,6 +2,11 @@
 
 *** EV VMT State Spillover ***
 
+**** COMMENTS FROM XIAODAN:
+- MAKE SURE THE FILE NAMES ARE UPDATED THROUGHOUT THE PIPELINE
+- 
+
+
 At present, the pipeline is made up of the following files, to be run in order:
 
 STEPS 1 and 2. File: EV_VMT_state_spillover.py
