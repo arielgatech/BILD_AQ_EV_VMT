@@ -18,7 +18,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'WA'
+selected_state = 'AZ'
 
 # load inputs
 nhb_vmt_file = 'NHTS_nonhome_VMT_fraction_' + selected_state + '.csv'

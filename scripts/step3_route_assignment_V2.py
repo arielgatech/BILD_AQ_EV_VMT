@@ -18,7 +18,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'WA'
+selected_state = 'AZ'
 
 # load inputs
 od_trip_file = 'OD_home_based_trips_by_tract.csv.zip'
@@ -81,14 +81,17 @@ for route in list_of_routes:
         continue
     print('processing route ' + route)
     route_df = read_csv('Input/' + selected_state + '/route/' + route)
+    # print(len(route_df))
     route_df = route_df.loc[route_df['Length'] > 0]
     route_df = pd.merge(route_df, ccst_lookup_short, on = 'GEOID', how = 'left')
+    # print(len(route_df))
     route_df['destination'] = route_df['destination'].astype(int)
     # print(route_df.columns)
     trip_to_route = pd.merge(od_trips, route_df,
                           left_on = ['home_GEOID', 'destination'],
                           right_on = ['source', 'destination'],
                           how = 'inner')
+    # print(len(trip_to_route))
     sample_origin_tract = trip_to_route['GEOID'].unique()[0]
     # trip_to_route = trip_to_route.dropna()
     trip_to_route.loc[:, 'distance'] *= meter_to_mile
@@ -97,11 +100,13 @@ for route in list_of_routes:
     trip_to_route.loc[:, 'DistanceBinID'] = pd.cut(trip_to_route.loc[:, 'distance'], distance_bins, 
                                                       labels = distance_bin_labels, ordered = False)
     trip_to_route.loc[:, 'DistanceBinID'] = trip_to_route.loc[:, 'DistanceBinID'].astype(str)
+    trip_to_route.loc[:, 'DistanceBinID'] = trip_to_route.loc[:, 'DistanceBinID'].astype(int)
     trip_to_route.loc[:, 'VMT'] = np.round(trip_to_route.loc[:, 'VMT'], 0)
     trip_to_route = trip_to_route.loc[trip_to_route['VMT'] > 0]
-
+    # print(len(trip_to_route))
     VMT_to_home = trip_to_route.groupby(grouping_var)[['VMT']].sum()
     VMT_to_home = VMT_to_home.reset_index() 
+    # print(len(VMT_to_home))
     # VMT_to_home['VMT'] = np.round(VMT_to_home['VMT'], 0)
     # VMT_to_home = VMT_to_home[VMT_to_home['VMT'] > 0]
     
@@ -110,20 +115,20 @@ for route in list_of_routes:
 
     VMT_to_destination = trip_to_route.groupby(grouping_var_2)[['VMT']].sum()
     VMT_to_destination = VMT_to_destination.reset_index() 
-        
+    # print(len(VMT_to_destination))    
     VMT_to_destination_out = pd.concat([VMT_to_destination_out, VMT_to_destination])
     
 
     OD_summary = trip_to_route.groupby(grouping_var_3)[['INRIX_distance', 'distance', 'TripGeneration']].mean()
     OD_summary = OD_summary.reset_index()
-    
+    # print(len(OD_summary))    
     OD_summary.loc[:, 'OD'] = OD_summary['home_GEOID'].astype(str) + '_' + OD_summary['destination'].astype(str)
     
     OD_summary_out = pd.concat([OD_summary_out, OD_summary])
     unique_ODs = OD_summary.OD.unique()
     od_trips = od_trips.loc[~ od_trips['OD'].isin(unique_ODs)] # remove trips with route assigned
     print('total trip VMT = ' + str(VMT_to_home.loc[:, 'VMT'].sum()))  
-     # break
+    break
     #                
     # grouping_var = ['GEOID', 'home_GEOID', 'home_geotype', 'home_microtype', # through tract + home attributes
     #                 'populationGroupType',  # demographic group
@@ -172,6 +177,7 @@ for route in list_of_routes:
     trip_to_route.loc[:, 'DistanceBinID'] = pd.cut(trip_to_route.loc[:, 'distance'], distance_bins, 
                                                       labels = distance_bin_labels, ordered = False)
     trip_to_route.loc[:, 'DistanceBinID'] = trip_to_route.loc[:, 'DistanceBinID'].astype(str)
+    trip_to_route.loc[:, 'DistanceBinID'] = trip_to_route.loc[:, 'DistanceBinID'].astype(int)
     trip_to_route.loc[:, 'VMT'] = np.round(trip_to_route.loc[:, 'VMT'], 0)
     trip_to_route = trip_to_route.loc[trip_to_route['VMT'] > 0]
 
