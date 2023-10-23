@@ -21,7 +21,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'OR'
+selected_state = 'AZ'
 
 # step 0 --- load input
 trip_generation_file = 'TripGeneration_' + selected_state +'.csv'
@@ -49,7 +49,7 @@ microtype_lookup = read_csv('Network/' + microtype_lookup_file, sep = ',')
 
 # load destination choice parameters
 dest_choice_file = 'destination_choice_parameters.csv'
-dest_choice_param = read_csv('Input/' + selected_state + '/' + dest_choice_file, sep = ',')
+dest_choice_param = read_csv('Input/' + dest_choice_file, sep = ',')
 
 # <codecell>
 # step 1 --- check trip generation & pre-processing
@@ -74,7 +74,7 @@ max_radius = 80
 sample_size = 10
 # power_coeff = 1.5 # square of distance
 prob_cut = 0.01 # tunable param, drop destinations with too low probability and rescale the fraction for the rest destinations
-params = [1, 1.1304325571385003, 0, 0.358900596202457] # fitted Weibull parameters 
+params = [1, 1.136, 0, 0.354] # fitted Weibull parameters 
 
 def split_dataframe(df, chunk_size = 10000): 
     chunks = list()
@@ -169,7 +169,10 @@ print(trip_attraction.columns)
 
 
 def destination_choice_model(data, param, grouping_var, prob_cut = 0.01):
-    data = pd.merge(data, param, on = 'populationGroupType', how = 'left')
+    # print(data.columns)
+    # print(param.columns)
+    data = pd.merge(data, param, 
+                    on = ['home_geotype', 'populationGroupType'], how = 'left')
     data.loc[:, 'Utility'] = data.loc[:, 'B_time'] * \
         data.loc[:, 'travel_time_h'] + data.loc[:, 'B_distance'] * \
         data.loc[:, 'distance_mile'] + data.loc[:, 'B_size'] * \
@@ -249,7 +252,10 @@ home_trip_attraction = pd.concat([trip_attraction_with_choice_out, trip_attracti
 
 
 home_trip_attraction = home_trip_attraction.rename(columns = {'geotype': 'dest_geotype', 'microtype': 'dest_microtype'})
-home_trip_attraction.to_csv('Output/' + selected_state + '/OD_home_based_trips_by_tract.csv.zip')
+output_dir = 'Output/' + selected_state 
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+home_trip_attraction.to_csv(output_dir + '/OD_home_based_trips_by_tract.csv.zip')
 
 # <codecell>
 
@@ -257,7 +263,10 @@ home_trip_attraction["distance_mile"].plot(kind="hist", density = True,
                                       weights = home_trip_attraction["TripGeneration"], bins = 50)
 plt.xlabel('trip distance (mile)')
 plt.ylabel('probability density')
-plt.savefig('Plot/' + selected_state + '/car_trip_distance_distribution_GEMS.png', dpi = 200)
+plot_dir = 'Plot/' + selected_state
+if not os.path.exists(plot_dir):
+    os.makedirs(plot_dir)
+plt.savefig(plot_dir + '/car_trip_distance_distribution_GEMS.png', dpi = 200)
 # process non-home trips
 # nonhome_trip_attraction = home_trip_attraction.groupby(['GEOID', 'home_geotype', 'home_microtype', 'populationGroupType',
 #                                                         'destination', 'geotype', 'microtype'])[['NHBTripGeneration']].sum()
