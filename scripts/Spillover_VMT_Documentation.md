@@ -1,19 +1,17 @@
-** BILD AQ Documentation **
+# BILD AQ Documentation
 
-*** EV VMT State Spillover ***
-
-**** COMMENTS FROM XIAODAN:
-- MAKE SURE THE FILE NAMES ARE UPDATED THROUGHOUT THE PIPELINE
-- 
-
+## EV VMT State Spillover
 
 At present, the pipeline is made up of the following files, to be run in order:
 
-STEPS 1 and 2. File: EV_VMT_state_spillover.py
+**STEP 0** (in preparation): checks the filepaths and required input files are ready.
+
+**STEPS 1 and 2:** File: EV_VMT_state_spillover.py **Note: currently being updated**
 Description: Generates spillover trips by home tract. Includes:
-1. Calculation of total home-based spillover trips 
-2. Assignment of spillover trips to tracts near the border, within the origin state
-3. Destination choice
+1. Calculation of nearest out-of-state tract to every state input tract plus distance
+2. Calculation of total home-based spillover trips 
+3. Assignment of spillover trips to tracts near the border, within the origin state
+4. Destination choice
 
 Inputs: 
 - Trip generation files (ACS pop, CCST lookup, HB Spillover, HB Border Frac)
@@ -26,7 +24,7 @@ Notes: state has to be changed and file paths have to be checked.
 Output: OD Home Based Trips Spillover .csv file (for a given state)
 _______
 
-STEP 3. File: EV_VMT_state_spillover_step3.py
+**STEP 3:** File: EV_VMT_state_spillover_step3.py
 Description: Route choice model with shortest path
 Inputs:
 - Pre-processed routes (number of available routes depends on whether imputation has been run or not)
@@ -39,7 +37,7 @@ Outputs:
 
 ________
 
-ROUTE IMPUTATION - File: state_route_imputation-fixed.R
+**ROUTE IMPUTATION Step:** - File: state_route_imputation-fixed.R
 Notes:
 - Iterative process
 - Re-run step 3 after doing this (it adds more routes that were previously flagged as missing)
@@ -52,9 +50,10 @@ Input:
 Output:
 - Imputed routes
 
+**In development**: a .Rmd file in R which, through the use of 'reticulate', merges the R and Python scripts.
 _________
 
-STEP 4. EV_VMT_state_spillover_nhb_step4.py
+**STEP 4:** EV_VMT_state_spillover_nhb_step4.py
 Description: Non Home-based VMT calculation
 
 - Similar structure to Step 1
@@ -66,3 +65,4 @@ Inputs:
 Outputs:
  - NHB VMT spillover (.csv file)
 __________
+
