@@ -33,7 +33,8 @@ start_time <- Sys.time()
 path2file <-"/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data"
 setwd(path2file)
 
-state_input = 'CA'
+state_input = 'AZ'
+if_spillover = 0
 
 
 #### load input ####
@@ -42,7 +43,7 @@ state_tract_shapefile_input <- st_read(paste0('Network/combined/combined_tracts/
 # 73,056 census tracts
 
 # load OD with missing routes
-OD_to_impute <- fread(paste0('Network/', state_input, '/OD_to_impute_spillover.csv'))
+OD_to_impute <- fread(paste0('Network/', state_input, '/OD_to_impute.csv'))
 
 cl <- parallel::makeCluster(num_cores-4) #if 32 cores: 27 is max as anything above seems to crash. else: num_Cores-1
 # #parallel::registerDoParallel(cl)
@@ -175,7 +176,13 @@ end_time_route_loop <- Sys.time()
 df <- list.files("route/processed", pattern = "*.geojson", full.names = TRUE) %>% 
   lapply(st_read) %>% 
   bind_rows 
-st_write(df, paste0('route/processed/final/imputed_CA_spillover_route.geojson'), append=FALSE)
+if (if_spillover == 0){
+  file_name = paste0('route/processed/final/imputed_', state_input, '_route.geojson')
+} else{
+  file_name = paste0('route/processed/final/imputed_', state_input, '_route_spillover.geojson')
+}
+
+st_write(df, file_name, append=FALSE)
 ### How long did the code take?
 elapsed_time <- end_time - start_time
 
