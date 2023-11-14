@@ -33,7 +33,7 @@ start_time <- Sys.time()
 path2file <-"/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data"
 setwd(path2file)
 
-state_input = 'AZ'
+state_input = 'NV'
 if_spillover = 0
 
 
@@ -184,6 +184,7 @@ if (if_spillover == 0){
 
 st_write(df, file_name, append=FALSE)
 ### How long did the code take?
+end_time <- Sys.time()
 elapsed_time <- end_time - start_time
 
 ### How long did the loop take?

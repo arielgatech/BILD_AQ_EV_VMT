@@ -18,7 +18,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'AZ'
+selected_state = 'NM'
 
 # load inputs
 od_trip_file = 'OD_home_based_trips_by_tract.csv.zip'
@@ -46,6 +46,7 @@ od_trips = od_trips.groupby(grouping_var_0).agg({'TripGeneration' : np.sum,
 od_trips = od_trips.reset_index()
 od_trips.loc[:, 'VMT'] = od_trips.loc[:, 'distance_mile'] * od_trips.loc[:, 'TripGeneration']
 print(od_trips.loc[:, 'TripGeneration'].sum())
+print('total VMT before route assignment:')
 print(od_trips.loc[:, 'VMT'].sum())
 print(len(od_trips))
 od_trips = od_trips.rename(columns = {'GEOID': 'home_GEOID', 'distance_mile': 'INRIX_distance'})
@@ -127,8 +128,8 @@ for route in list_of_routes:
     OD_summary_out = pd.concat([OD_summary_out, OD_summary])
     unique_ODs = OD_summary.OD.unique()
     od_trips = od_trips.loc[~ od_trips['OD'].isin(unique_ODs)] # remove trips with route assigned
-    print('total trip VMT = ' + str(VMT_to_home.loc[:, 'VMT'].sum()))  
-    break
+    # print('total trip VMT = ' + str(VMT_to_home.loc[:, 'VMT'].sum()))  
+    # break
     #                
     # grouping_var = ['GEOID', 'home_GEOID', 'home_geotype', 'home_microtype', # through tract + home attributes
     #                 'populationGroupType',  # demographic group
@@ -203,11 +204,12 @@ for route in list_of_routes:
     OD_summary_out = pd.concat([OD_summary_out, OD_summary])
     unique_ODs = OD_summary.OD.unique()
     od_trips = od_trips.loc[~ od_trips['OD'].isin(unique_ODs)] # remove trips with route assigned
-    print('total trip VMT = ' + str(VMT_to_home.loc[:, 'VMT'].sum()))  
+    # print('total trip VMT = ' + str(VMT_to_home.loc[:, 'VMT'].sum()))  
     # break
 
 
 # <codecell>
+print('total VMT after route assignment:')
 print('total routed VMT is ' + str(VMT_to_home_out['VMT'].sum()))
 print('total trips is ' + str(OD_summary_out['TripGeneration'].sum()))
 # post-processing data
@@ -234,6 +236,8 @@ od_trips_impute.loc[:, 'fraction'] =od_trips_impute.loc[:, 'fraction'].cumsum()
 od_trips_impute = od_trips_impute[od_trips_impute['fraction'] <= 0.95]
 od_trips_impute = od_trips_impute[od_trips_impute['VMT'] > 50]
 print(od_trips_impute.VMT.sum())
+print('number of OD pairs to impute')
+print(len(od_trips_impute.VMT))
 od_trips_impute.to_csv('Network/' + selected_state + '/OD_to_impute.csv')
 
    

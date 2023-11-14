@@ -19,7 +19,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'AZ'
+selected_state = 'NM'
 # states_in_cd = ['WA', 'OR', 'AK', 'HI']
 # load input
 NHTS_population_file = 'Input/NHTS_population.csv'
