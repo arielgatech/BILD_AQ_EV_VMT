@@ -18,7 +18,7 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'AZ'
+selected_state = 'NM'
 
 # load inputs
 nhb_vmt_file = 'NHTS_nonhome_VMT_fraction_' + selected_state + '.csv'
@@ -36,15 +36,17 @@ ccst_lookup = read_csv(ccst_lookup_file, sep = ',')
 # <codecell>
 
 # total non-home VMT linked to each destination
+print('total hb VMT is:')
+print(VMT_to_destination['VMT'].sum())
 nhb_VMT_by_destination = pd.merge(VMT_to_destination, nhb_trip_vmt_fraction,
                                   left_on = ['dest_geotype', 'dest_microtype', 'DistanceBinID'],
                                   right_on = ['o_geotype', 'o_microtype', 'DistanceBinID'], how = 'left')
 
 nhb_VMT_by_destination.loc[:, 'VMT'] *= nhb_VMT_by_destination.loc[:, 'nhb_fraction_VMT']
     
-print(nhb_VMT_by_destination.head(5))  
-print(nhb_VMT_by_destination.loc[:, 'VMT'].sum())
-print(VMT_to_destination.VMT.sum())  
+# print(nhb_VMT_by_destination.head(5))  
+# print(nhb_VMT_by_destination.loc[:, 'VMT'].sum())
+# print(VMT_to_destination.VMT.sum())  
 
 
 # <codecell>
@@ -63,7 +65,7 @@ grouping_var_2 = ['GEOID', 'destination', 'dest_geotype', 'dest_microtype']
 dest_chunk = np.array_split(destination_list, 100)
 i = 0
 for dest in dest_chunk:
-    print('processing trips to destination chunk ' + str(i))
+    # print('processing trips to destination chunk ' + str(i))
     nhb_VMT = nhb_VMT_by_destination.loc[nhb_VMT_by_destination['destination'].isin(dest)]
     nhb_VMT = pd.merge(nhb_VMT, OD_summary, 
                        on = ['destination', 'dest_geotype', 'dest_microtype'], how = 'left')
@@ -83,5 +85,8 @@ for dest in dest_chunk:
 
 nhb_VMT_by_home_out = nhb_VMT_by_home_out.groupby(['GEOID', 'geotype', 'microtype', 'home_GEOID', 'home_geotype', 'home_microtype',
        'populationGroupType'])[['VMT']].sum()
+
 nhb_VMT_by_home_out = nhb_VMT_by_home_out.reset_index()
+print('total non-home-based VMT is:')
+print(np.round(nhb_VMT_by_home_out['VMT'].sum(),1))
 nhb_VMT_by_home_out.to_csv('Output/' + selected_state + '/' + 'nonhome_daily_vmt_by_tracts.csv', index = False)
