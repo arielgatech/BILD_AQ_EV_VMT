@@ -194,7 +194,7 @@ plt.ylim([10, 2000000])
 # plt.yscale('log')
 plt.xlabel('HPMS VMT by tract')
 plt.ylabel('Simulated VMT by tract')
-plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract_CA.png', dpi = 200)
+plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract.png', dpi = 200)
 
 
 ax = sns.scatterplot(data = state_tracts_geojson_in_state, 
@@ -206,7 +206,7 @@ diag_line, = ax.plot(ax.get_xlim(), ax.get_ylim(), ls="--", c="0.5")
 # plt.yscale('log')
 plt.xlabel('HPMS VMT by tract')
 plt.ylabel('Simulated VMT by tract')
-plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract_with_diagline_CA.png', 
+plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract_with_diagline.png', 
             dpi = 200, bbox_inches = 'tight')
 
 rmse_vmt = mean_squared_error(state_tracts_geojson_in_state['HPMS_VMT'], 
@@ -283,7 +283,7 @@ for selected_state in selected_states:
     print(state_HMPS_by_home_tract_out.VMT.sum())
     # sample_HMPS_by_home_tract = state_HMPS_by_home_tract.head(1000)
     # sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
-    # state_HMPS_by_home_tract_out.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_multistate_spillover.csv', index = False)
+    state_HMPS_by_home_tract_out.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_multistate_spillover.csv', index = False)
 print(state_HMPS_by_home_tract.head(5))
 
 # <codecell>
