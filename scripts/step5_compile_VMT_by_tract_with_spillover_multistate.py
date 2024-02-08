@@ -23,8 +23,10 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_states = ['AZ', 'CA', 'CO', 'ID', 'MT', 'NM',
-                   'NV', 'OR', 'UT', 'WA', 'WY']
+# selected_states = ['AZ', 'CA', 'CO', 'ID', 'MT', 'NM',
+#                    'NV', 'OR', 'UT', 'WA', 'WY']
+
+selected_states = ['AZ', 'CO', 'NM', 'UT']
 
 output_folder = 'WECC'
 # load input
@@ -119,7 +121,7 @@ VMT_by_state = pd.concat([home_VMT_by_state, nonhome_VMT_by_state,
                           home_spillover_VMT_by_state, nonhome_spillover_VMT_by_state])
 
 sns.barplot(data = VMT_by_state, x = "State", y = "VMT", hue = "Label")
-plt.savefig('Plot/' + output_folder + '/WECC_VMT_plot.png', dpi = 300)
+# plt.savefig('Plot/' + output_folder + '/WECC_VMT_plot.png', dpi = 300)
 plt.show()
 VMT_by_state.to_csv('Output/' + output_folder + '/WECC_VMT_summary.csv', index = False)
 
@@ -150,7 +152,7 @@ ax = state_tracts_geojson.plot(figsize = (10,6), column = 'VMT', alpha = 0.6, le
                                                            vmax = state_tracts_geojson.VMT.max()))
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT by tract')
-plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_all_spillover.png', dpi = 200)
+# plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_all_spillover.png', dpi = 200)
 
 # <codecell>
 meter_to_mile = 0.000621371
@@ -178,7 +180,7 @@ ax = state_tracts_geojson_in_state.plot(figsize = (10,6), column = 'HPMS_VMT', a
                             norm=matplotlib.colors.LogNorm(vmin = 1, vmax = state_tracts_geojson.HPMS_VMT.max()))
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT by tract')
-plt.savefig('Plot/' + output_folder + '/HPMS_VMT_by_tract.png', dpi = 200)
+# plt.savefig('Plot/' + output_folder + '/HPMS_VMT_by_tract.png', dpi = 200)
 
 # <codecell>
 # from sklearn.metrics import mean_absolute_percentage_error
@@ -194,7 +196,7 @@ plt.ylim([10, 2000000])
 # plt.yscale('log')
 plt.xlabel('HPMS VMT by tract')
 plt.ylabel('Simulated VMT by tract')
-plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract.png', dpi = 200)
+# plt.savefig('Plot/' + output_folder + '/VMT_comparison_by_tract.png', dpi = 200)
 
 
 ax = sns.scatterplot(data = state_tracts_geojson_in_state, 
@@ -283,7 +285,7 @@ for selected_state in selected_states:
     print(state_HMPS_by_home_tract_out.VMT.sum())
     # sample_HMPS_by_home_tract = state_HMPS_by_home_tract.head(1000)
     # sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
-    state_HMPS_by_home_tract_out.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_multistate_spillover.csv', index = False)
+    # state_HMPS_by_home_tract_out.to_csv('Output/' + selected_state + '/BILDAQ_VMT_by_tract_multistate_spillover.csv', index = False)
 print(state_HMPS_by_home_tract.head(5))
 
 # <codecell>
@@ -305,7 +307,7 @@ ax = state_tracts_geojson.plot(figsize = (10,6), column = 'VMT', alpha = 0.6, le
                                                            vmax = state_tracts_geojson.VMT.max()))
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT by tract')
-plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_scaled_spillover.png', dpi = 200)
+# plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_scaled_spillover.png', dpi = 200)
 
 # <codecell>
 land_area_by_tract = read_csv('Network/combined/combined_tract_land_area.csv')
@@ -325,4 +327,4 @@ ax = state_tracts_geojson.plot(figsize = (10,6), column = 'VMT_per_km2',
                                )
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT per km2 by tract')
-plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_per_km2_with_scaled_spillover.png', dpi = 200)
+# plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_per_km2_with_scaled_spillover.png', dpi = 200)
