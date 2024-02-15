@@ -22,9 +22,10 @@ sns.set(font_scale=1.2)  # larger font
 total_start_time = time.time()
 
 state_name = 'CA'
+analysis_years = [2032]
 
 link_to_tempo_output = './Input/' + state_name + '/tract_output_nevi.csv'
-link_to_gems_output = './Input/' + state_name + '/BILDAQ_VMT_by_tract.csv'
+link_to_gems_output = './Input/' + state_name + '/BILDAQ_VMT_by_tract_multistate_spillover.csv'
 GEMS_output_files = []
 
 # load TEMPO output
@@ -62,7 +63,7 @@ home_VMT = home_VMT.reset_index()
 #so basically need to figure out what code to loop/repeat to get both baseline and scenario results.  
 # prepare input and parameters
 # analysis_years = list(tempo_result.Year.unique())
-analysis_years = [2030]
+
 scenarios = tempo_result['Scenario'].unique()
 # scenarios = ['Baseline', 'NEVI']
 #analysis_year = 2018
@@ -154,7 +155,7 @@ for analysis_year in analysis_years:
         VMT_by_thru_tract_and_veh = VMT_by_thru_tract_and_veh.reset_index()
 
         # writing output VMT by tracts
-        VMT_by_thru_tract_and_veh.to_csv('./Output/'+ state_name + '/EV_VMT/raw_VMT_' + output_name + '_' + scenario_name + '_old.csv', index = False)
+        VMT_by_thru_tract_and_veh.to_csv('./Output/'+ state_name + '/EV_VMT/raw_VMT_' + output_name + '_' + scenario_name + '.csv', index = False)
         print(VMT_by_thru_tract_and_veh.head(5))
 
         VMT_by_thru_tract_and_veh['thru_GEOID'] = VMT_by_thru_tract_and_veh['thru_GEOID'].apply(lambda x: x.zfill(11))

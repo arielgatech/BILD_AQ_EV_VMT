@@ -19,12 +19,13 @@ plt.style.use('ggplot')
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-selected_state = 'OR'
-states_in_cd = ['WA', 'OR', 'AK', 'HI']
+selected_state = 'NM'
+# states_in_cd = ['WA', 'OR', 'AK', 'HI']
 # load input
 NHTS_population_file = 'Input/NHTS_population.csv'
 ACS_population_file = 'Input/ACS_household_by_tracts.csv'
 ccst_lookup_file = 'ccst_geoid_key_tranps_geo_with_imputation.csv'
+state_region_file = 'Input/NHTS_region_state.csv'
 
 # load state-specific inputs
 hb_trip_generation_file = 'Input/' + selected_state + \
@@ -36,6 +37,7 @@ hb_trip_generation_file = 'Input/' + selected_state + \
 NHTS_population = read_csv(NHTS_population_file, sep = ',')
 ACS_population = read_csv(ACS_population_file, sep = ',')
 hb_trip_generation = read_csv(hb_trip_generation_file, sep = ',')
+state_region_lookup = read_csv(state_region_file)
 # nhb_trip_fraction = read_csv(nhb_trip_fraction_file, sep = ',')
 # nhb_trip_generation = read_csv(nhb_trip_generation_file, sep = ',')
 ccst_lookup = read_csv(ccst_lookup_file, sep = ',')
@@ -61,6 +63,11 @@ ACS_population_by_inc.to_csv('Input/' + selected_state + '/ACS_population_'+ sel
 # process NHTS population
 
 # NHTS Population needs to come from multiple states (census division)
+region_code = str(state_region_lookup.loc[state_region_lookup['state'] == selected_state, 'region'].tolist()[0])
+    
+states_in_cd = \
+    state_region_lookup.loc[state_region_lookup['region'] == region_code, 'state'].unique()
+print(states_in_cd)
 NHTS_population_state = NHTS_population.loc[NHTS_population['st_code'].isin(states_in_cd)]
 NHTS_population_state = NHTS_population_state.groupby(['geotype', 'microtype', 'populationGroupType'])[['NHTS_households']].sum()
 NHTS_population_state = NHTS_population_state.reset_index()
