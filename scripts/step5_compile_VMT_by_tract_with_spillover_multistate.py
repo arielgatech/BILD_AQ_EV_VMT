@@ -17,16 +17,17 @@ import geopandas as gpd
 import contextily as cx
 from sklearn.metrics import mean_squared_error, r2_score 
 import matplotlib
+from pygris import states
 
 plt.style.use('ggplot')
 
 path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
-# selected_states = ['AZ', 'CA', 'CO', 'ID', 'MT', 'NM',
-#                    'NV', 'OR', 'UT', 'WA', 'WY']
+selected_states = ['AZ', 'CA', 'CO', 'ID', 'MT', 'NM',
+                    'NV', 'OR', 'UT', 'WA', 'WY']
 
-selected_states = ['AZ', 'CO', 'NM', 'UT']
+# selected_states = ['AZ', 'CO', 'NM', 'UT']
 
 output_folder = 'WECC'
 # load input
@@ -289,6 +290,14 @@ for selected_state in selected_states:
 print(state_HMPS_by_home_tract.head(5))
 
 # <codecell>
+
+# collecting state boundary
+us_states = states(year = 2018)
+wecc_states = us_states.loc[us_states['STUSPS'].isin(selected_states)]
+wecc_states_boundary = wecc_states.dissolve()
+wecc_states_boundary.plot()
+
+# <codecell>
 sample_HMPS_by_home_tract = state_VMT_spillover.sample(1000)
 sample_HMPS_by_home_tract.to_csv('Output/' + selected_state + '/sample_VMT_by_tract_with_spillover.csv', index = False)
 # plot final CA results with scaled spillover
@@ -305,9 +314,10 @@ state_tracts_geojson = state_tracts_geojson.merge(VMT_by_tract, on='GEOID', how=
 ax = state_tracts_geojson.plot(figsize = (10,6), column = 'VMT', alpha = 0.6, legend=True,
                             norm=matplotlib.colors.LogNorm(vmin = 1, 
                                                            vmax = state_tracts_geojson.VMT.max()))
+wecc_states_boundary.plot(ax = ax, facecolor='none', edgecolor='k',linewidth = 1)
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT by tract')
-# plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_scaled_spillover.png', dpi = 200)
+plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_by_tract_with_scaled_spillover.png', dpi = 200)
 
 # <codecell>
 land_area_by_tract = read_csv('Network/combined/combined_tract_land_area.csv')
@@ -325,6 +335,7 @@ ax = state_tracts_geojson.plot(figsize = (10,6), column = 'VMT_per_km2',
                                norm=matplotlib.colors.LogNorm(vmin = 1, 
                                                               vmax = state_tracts_geojson.VMT_per_km2.max())
                                )
+wecc_states_boundary.plot(ax = ax, facecolor='none', edgecolor='k',linewidth = 0.5)
 cx.add_basemap(ax, crs = 'EPSG:4326', source = cx.providers.CartoDB.Positron)
 plt.title('VMT per km2 by tract')
-# plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_per_km2_with_scaled_spillover.png', dpi = 200)
+plt.savefig('Plot/' + output_folder + '/BILDAQ_VMT_per_km2_with_scaled_spillover.png', dpi = 200)
