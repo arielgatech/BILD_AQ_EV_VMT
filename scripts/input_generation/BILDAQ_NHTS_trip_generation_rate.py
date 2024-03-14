@@ -238,6 +238,14 @@ car_data_df = pd.merge(car_data_df, national_geoid_lookup,
                             how = 'left')
 car_data_df.to_csv(input_dir + 'NHTS_car_trips.csv', index = False)
 
+car_data_df_no_loc = car_data_df[['geotype', 'microtype', 
+                                  'o_geotype', 'o_microtype', 
+                           'dest_geotype','dest_microtype',  
+                           'populationGroupType', 'trip_tag', 
+                           'start hour', 'travel time', 
+                           'trip_purpose', 'trpmiles', 'distanceBin', 'wtperfin']]
+car_data_df_no_loc.to_csv(input_dir + 'NHTS_car_trips_no_loc.csv', index = False)
+
 # <codecell>
 unique_state = state_region_lookup['state'].unique()
 for st in unique_state:

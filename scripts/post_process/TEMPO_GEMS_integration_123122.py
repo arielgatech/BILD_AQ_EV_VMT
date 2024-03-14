@@ -21,8 +21,8 @@ plt.style.use('ggplot')
 sns.set(font_scale=1.2)  # larger font
 total_start_time = time.time()
 
-state_name = 'CA'
-analysis_years = [2032]
+state_name = 'WA'
+analysis_years = [2018]
 
 link_to_tempo_output = './Input/' + state_name + '/tract_output_nevi.csv'
 link_to_gems_output = './Input/' + state_name + '/BILDAQ_VMT_by_tract_multistate_spillover.csv'
