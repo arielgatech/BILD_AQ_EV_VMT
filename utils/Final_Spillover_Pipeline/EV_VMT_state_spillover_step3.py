@@ -149,7 +149,9 @@ VMT_to_home.to_csv('Output/' + selected_state + '/home_daily_vmt_spillover.csv',
 VMT_to_destination.to_csv('Output/' + selected_state + '/destination_daily_vmt_spillover.csv', index = False)
 OD_summary.to_csv('Output/' + selected_state + '/OD_summary_spillover.csv', index = False)
 print("VMT to Home & OD summary CSV files written")
-# # <codecell>
+
+
+# <codecell>
 # # find O-Ds that need impute
 od_trips_impute = od_trips.groupby(['home_GEOID', 'destination', 'OD'])[['VMT']].sum()
 od_trips_impute = od_trips_impute.reset_index()

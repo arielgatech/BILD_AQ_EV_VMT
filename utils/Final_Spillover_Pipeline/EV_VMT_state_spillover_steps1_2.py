@@ -23,11 +23,12 @@ import dask.dataframe as dd
 plt.style.use('ggplot')
 
 # set working directory
-path_to_prj = os.getcwd()
+# path_to_prj = os.getcwd()
+path_to_prj = '/Users/xiaodanxu/Library/CloudStorage/GoogleDrive-arielinseu@gmail.com/My Drive/GEMS/BILD-AQ/data'
 os.chdir(path_to_prj)
 
 # set current state for analysis
-selected_state = 'UT'
+selected_state = 'CA'
 
 # trip generation input
 ACS_population_file = 'ACS_household_by_tracts.csv'
@@ -55,44 +56,12 @@ opportunity_by_tract = read_csv('Network/' + opportunity_file, sep=',')
 transit_by_tract = read_csv('Network/' + transit_file, sep=',')
 dest_choice_param = read_csv('Input/' + dest_choice_file, sep=',')
 
-
-############ Step 0.1 - Assign the closest out-of-state Tract and its distance to every tract in the state
-
-# Create new dataframe
-df = pd.read_csv('Network/' + dist_matrix_file)
-
-
-# Need to flag destinations in the state
-
-state_geoid_dic = {'CA': '06', 'OR' : '41', 'WA':'53', 'CO': '08', 'ID': '16', 'NV':'32', 'MT':'30', 'WY':'56',
-                   'UT': '49', 'NM' : '35', 'AZ':'04'}
-sel_state_geoid = state_geoid_dic[f'{selected_state}']
-geoid_lower=int(sel_state_geoid+'000000000')
-geoid_upper=int(sel_state_geoid+'999999999')
-# State GEOID is 6. Hence numbers between 6000000000 and 6999999999 are in California
-# State GEOID is 16. Hence numbers between 6000000000 and 6999999999 are in IDAHO
-df['dest_state'] = np.where((df['destination'] >= geoid_lower) & (df['destination'] <= geoid_upper) , 1, 0)
-
-# Filter out selected_state destinations
-df_out=df[df['dest_state']==0]
-
-# Calculate the minimum distance for every origin
-# Output: origin tract - minimum distance to out of state tract - tract
-min_dist_out = df.loc[df_out.groupby('origin')['distance'].idxmin()]
-
-
-min_dist_out = min_dist_out.reset_index()
-final_df = min_dist_out[['origin','destination','distance']].copy()
-
-# Produce the tract_to_border_distance file
-final_df.to_csv('Network/combined/' + selected_state + '_tract_to_border_distance.csv')
-
-
 # Load the newly produced tracts to border distance matrix
-tracts_to_border_matrix = pd.read_csv('Network/combined/' + selected_state + '_tract_to_border_distance.csv')
+tracts_to_border_matrix = pd.read_csv('Network/' + selected_state + '/tract_to_border_distance.csv')
 
 
 
+# <codecell>
 
 ####################################################################################
 ############ step 1 -- spillover trip generation (by home tract) ###################
@@ -137,6 +106,12 @@ print('Total home based spillover trips in ' + selected_state + ' is:')
 print(spillover_trip_generation_state.loc[:, 'TripGeneration'].sum())
 # 610345.132454572 - total did not change. GEOID added after this edit
 
+
+# drop the micro-geotype of current home location 
+# --> these will reassigned using micro-geotype of border tracts
+spillover_trip_generation_state = \
+    spillover_trip_generation_state.drop(columns = ['geotype', 'microtype'])
+# <codecell>
 ### Step 1.2 -- assign spillover trips to near border tracts (within California)#
 
 # tracts_to_border_file = 'CA_tract_to_border_distance.csv' # CHANGE
@@ -171,7 +146,8 @@ for idx, row in tracts_to_border_matrix.iterrows():
     else:
         tracts_to_border_matrix.at[idx, 'dist_bin'] = 'bin6'
 
-tracts_to_border_binned = pd.merge(tracts_to_border_matrix, hb_spillover_border_fraction_3bins,
+tracts_to_border_binned = pd.merge(tracts_to_border_matrix, 
+                                   hb_spillover_border_fraction_3bins,
                                    on='dist_bin',
                                    how='left')
 
@@ -196,7 +172,8 @@ else:
 # I am going to assign to all tracts in the state as per the proportions
 spillover_trip_generation_state_backup = spillover_trip_generation_state
 
-spillover_trip_generation_state = pd.merge(spillover_trip_generation_state, tracts_to_border_binned,
+spillover_trip_generation_state = pd.merge(spillover_trip_generation_state, 
+                                           tracts_to_border_binned,
                                            on='populationGroupType',
                                            how='left')
 
@@ -303,11 +280,19 @@ ratio = tot_trips_gen / tot_households
 print("The average number of trips distributed by household is:")
 print(ratio)
 
+
+# <codecell>
+
 ############################################################
 ## # Step 1.3 -- Post-processing spillover trip data
 
 # rename some variables to be consistent with rest of code
+ccst_lookup_short = ccst_lookup[['GEOID', 'geotype', 'microtype']]
+ccst_lookup_short = ccst_lookup_short.drop_duplicates(subset = 'GEOID', keep = 'first')
 
+spillover_trip_generation_state = \
+    pd.merge(spillover_trip_generation_state, ccst_lookup_short,
+             on = 'GEOID', how = 'left')
 name_change = {'destination': 'border_tract_out_state',
                'distance': 'distance_to_border_tract',
                'TripGeneration': 'TripGen_Old',
