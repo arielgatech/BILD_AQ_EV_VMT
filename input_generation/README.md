@@ -12,11 +12,11 @@ https://data.census.gov/table?q=B19001:+HOUSEHOLD+INCOME+IN+THE+PAST+12+MONTHS+(
   * Income bin 2: annual income between 50k and 125k
   * Income bin 3: annual income >= 125k
   
-### step 2 -- processing NHTS data
+### step 2 -- processing NHTS data (run on server)
 code: [BILDAQ_NHTS_trip_generation_rate.py](BILDAQ_NHTS_trip_generation_rate.py)
 * Produce home-based trip generation rate: 'data/Input/{state}/NHTS_home_based_trips_{state}.csv'
 * Produce non-home-based trip generation rate (miles of nhb VMT as a result of per mile of hb VMT): 'data/Input/{state}/NHTS_nonhome_VMT_fraction_{state}.csv'
-* Produce car trips by home and O-D census tracts for destination-choice model: 'data/Input/NHTS_car_trips.csv' (proprietary) 
+* Produce car trips by home and O-D census tracts for destination-choice model: 'NHTS_car_trips.csv' (proprietary) 
 * Produce weighted NHTS household count by state, : 'data/Input/{state}/NHTS_population.csv' 
 
 ### step 3 -- generate US census tract map and great-circle-distance matrix
@@ -53,4 +53,62 @@ code: [assign_route_to_tract.ipynb](assign_route_to_tract.ipynb)
 * Compute through length in each census tract
 * Save output to: 'data/Input/{state}/route/*.csv'
 
-## Spillover
+### step 6 -- National-scale destination choice model estimation (run on server)
+code: [destination_choice_biogeme_multistates.ipynb](destination_choice_biogeme_multistates.ipynb)
+* Load NHTS data from step 2 as input: NHTS_car_trips.csv
+* Load following land use, opportunity data from FHWA GEMS project as inputs:
+** ccst_geoid_key_tranps_geo_with_imputation.csv
+** wac_tract_2017.csv
+** opportunity_counts_tract.csv
+** modeaccessibility.csv
+* Load INRIX travel skims from step 4: data/Network/{state}/travel_time_skim.csv
+* Estimate destination choice models by geotype (D & E combined due to lack of observations)
+* Writing estimated coefficient to this input: data/Input/destination_choice_parameters.csv
+
+### step 7 -- collecting national-level VMT from HPMS data
+code: [process_lane_mile_from_hpms.R](process_lane_mile_from_hpms.R)
+* Load 2017 HPMS data downloaded from https://www.fhwa.dot.gov/policyinformation/hpms/shapefiles_2017.cfm
+* Load U.S. census tract geometry from step 3: 'data/Network/combined/census_tracts_2017.geojson'
+* Intersect HPMS data with 2010 census tract boundary
+* Update link lane miles after intersection
+* Generate processed HPMS output: 'data/Network/{State}/{State}__HPMS_with_GEOID_LANEMILE.geojson
+
+## Spillover/cross-state travel generation
+### step 1 -- processing NHTS data (spillover only) (run on server)
+code: [BILD-AQ_NHTS_processor_spillover.ipynb](spillover/BILD-AQ_NHTS_processor_spillover.ipynb)
+* Produce home-based spillover trip generation rate: 'data/Input/spillover/NHTS_home_based_trip_rate_spillover.csv'
+* Produce non-home-based spillover trip generation rate (miles of nhb VMT as a result of per mile of hb VMT): 'data/Input/spillover/NHTS_nonhome_VMT_generation_spillover.csv'
+* Produce car trips by home and O-D census tracts for destination-choice model: 'NHTS_home_based_spillover_trips.csv' (proprietary) 
+* Produce non-home-based car trips for NHB factor estimation: 'NHTS_nonhome_OD_spillover.csv' (proprietary) 
+
+### step 2 -- spillover destination choice model estimation (run on server)
+code: [destination_choice_biogeme_spillover.ipynb](spillover/destination_choice_biogeme_spillover.ipynb)
+* Loading home-based spillover trips from step 1: 'NHTS_home_based_spillover_trips.csv'
+* Load following land use, opportunity data from FHWA GEMS project as inputs:
+** ccst_geoid_key_tranps_geo_with_imputation.csv
+** wac_tract_2017.csv
+** opportunity_counts_tract.csv
+** modeaccessibility.csv
+* Writing estimated coefficient to this input: 'data/Input/spillover/destination_choice_parameters.csv'
+
+### Step 3 -- other spillover allocation factors
+#### 3.1 - home-based border fraction
+code:[state_spillover_hb_vmt_analysis.ipynb](spillover/state_spillover_hb_vmt_analysis.ipynb)
+* Loading home-based spillover trips from step 1: 'NHTS_home_based_spillover_trips.csv'
+* Loading tract-to-tract distance matrix from general pipeline, step 3: 'data/Network/combined/distance_matrix_by_tracts_{state}.csv' 
+* calculate fraction of spillover trips based on distance bin to nearest out-of-state destination (border fraction): 'data/Input/spillover/home_based_border_fraction.csv'
+
+#### 3.2 - non-home-based radius fraction
+code:[state_spillover_nhb_vmt_analysis.ipynb](spillover/state_spillover_nhb_vmt_analysis.ipynb)
+* Loading non-home-based spillover trips from step 1: 'NHTS_nonhome_OD_spillover.csv'
+* Loading tract-to-tract distance matrix from general pipeline, step 3: 'data/Network/combined/distance_matrix_by_tracts_{state}.csv' 
+* Load following land use, opportunity data from FHWA GEMS project as inputs:
+** ccst_geoid_key_tranps_geo_with_imputation.csv
+* Calculate fraction of non-home-based VMT by distance to out-of-state entry point: 'data/Input/spillover/nonhome_spillover_distribution_factors.csv'
+
+#### Step 4 -- compute distance to border for all home tracts
+code:[generate_dist_to_border.py](spillover/generate_dist_to_border.py)
+* Loading tract-to-tract distance matrix from general pipeline, step 3: 'data/Network/combined/distance_matrix_by_tracts_{state}.csv' 
+* compute distance to nearest out-of-state destination:'data/Network/{state}/tract_to_border_distance.csv'
+
+
