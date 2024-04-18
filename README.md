@@ -5,9 +5,9 @@
 
 ##  Contact: Xiaodan Xu, Ph.D. (XiaodanXu@lbl.gov)
 
-**Notes:** a streamlined and packaged application of this tool is still under development, The current guide provides high-level overview on how to run individual modules, and how to integrate current model with NREL's TEMPO model
+**Notes:** a streamlined and packaged application of this tool is still under development, The current guide provides a high-level overview on how to run individual modules sequentially, and how to integrate current model with NREL's TEMPO model. If you have any questions, please reach out to the project team for support.
 
-** Input Generation: ** for guidance related to all the input generation steps, please refer to this [input guide](input_generaiton/README.md) for details.
+**Input Generation:** for guidance related to all the input generation steps, please refer to this [input guide](input_generaiton/README.md) for details.
 
 ## Part 1: In-state demand generation 
 
@@ -147,7 +147,7 @@ Outputs:
  
 
 ## Part 3: VMT calibration
-** VMT calibration ** file: [step5_compile_VMT_by_tract_with_spillover_multistate.py](utils/step5_compile_VMT_by_tract_with_spillover_multistate.py)
+**VMT calibration** file: [step5_compile_VMT_by_tract_with_spillover_multistate.py](utils/step5_compile_VMT_by_tract_with_spillover_multistate.py)
 
 Description: adjust total HB and NHB instate and spillover VMT using HPMS VMT
 
@@ -160,7 +160,7 @@ Outputs:
 
 ## Part 4: Integration with TEMPO
 
-** TEMPO integration ** file: [TEMPO_GEMS_integration_123122.py](post_process/TEMPO_GEMS_integration_123122.py)
+**TEMPO integration** file: [TEMPO_GEMS_integration_123122.py](post_process/TEMPO_GEMS_integration_123122.py)
 
 Description: load scaled VMT from Part 3 and TEMPO output from NREL team, calculate EV VMT penetration at census tract level (by distributing EV VMT adopted at home tracts to through tracts)
 
