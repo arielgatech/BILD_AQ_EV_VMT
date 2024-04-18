@@ -7,7 +7,7 @@
 
 **Notes:** a streamlined and packaged application of this tool is still under development, The current guide provides a high-level overview on how to run individual modules sequentially, and how to integrate current model with NREL's TEMPO model. If you have any questions, please reach out to the project team for support.
 
-**Input Generation:** for guidance related to all the input generation steps, please refer to this [input guide](input_generaiton/README.md) for details.
+**Input Generation:** for guidance related to all the input generation steps, please refer to this [input guide](input_generation/README.md) for details.
 
 ## Part 1: In-state demand generation 
 
