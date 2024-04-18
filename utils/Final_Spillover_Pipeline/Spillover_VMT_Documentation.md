@@ -4,15 +4,9 @@
 
 At present, the pipeline is made up of the following files, to be run in order:
 
-**Note:** you should change the 'selected_state' field at the start of every script
-
 **STEP 0** (in preparation): checks the filepaths and required input files are ready.
-NAME OF FILE:  CONFIRM FILE NAME
 
-**STEPS 1 and 2:** File: EV_VMT_state_spillover.py 
-
-**Note: currently being updated** CONFIRM NEW NAME
-
+**STEPS 1 and 2:** File: EV_VMT_state_spillover.py **Note: currently being updated**
 Description: Generates spillover trips by home tract. Includes:
 1. Calculation of nearest out-of-state tract to every state input tract plus distance
 2. Calculation of total home-based spillover trips 
@@ -33,8 +27,6 @@ _______
 **STEP 3:** File: EV_VMT_state_spillover_step3.py
 Description: Route choice model with shortest path
 Inputs:
-- If running for first time - initial files from Google Drive (https://drive.google.com/drive/folders/1vth5Q-b-lOyXlyxz2tlXodBWXIEau5Dn)
-to be placed in Input/route/{selected_state}_external/
 - Pre-processed routes (number of available routes depends on whether imputation has been run or not)
 - Output from Step 2
 Outputs:
@@ -45,10 +37,10 @@ Outputs:
 
 ________
 
-**ROUTE IMPUTATION - Part 1** - File: state_route_imputation-fixed.R
+**ROUTE IMPUTATION Step:** - File: state_route_imputation-fixed.R
 Notes:
-- Only file in R
 - Iterative process
+- Re-run step 3 after doing this (it adds more routes that were previously flagged as missing)
 - There is randomness here. Up until the end of Step2, we always get the same result. 
 Every time we rerun Step 3 we get something else.
 
@@ -57,24 +49,6 @@ Input:
 - OD with missing routes (from Step 3)
 Output:
 - Imputed routes
-
-Output: a long list of .gjson objects and a large .gjson object in the 'final' folder
-
-**ROUTE IMPUTATION - Part 2** - File: imputation_final_step.py
-- Inputs: the large, combined .gjson object
-- Output: a .csv file
-- Output: a copy of the .csv file in Input/route/{state}_external
-
-
-STEP 3 IN PYTHON AGAIN
-
-- Re-run step 3 at this stage (it adds more routes that were previously flagged as missing)
-Outputs: (NOW FINAL)
-- OD with missing routes (.csv file) (see next step)
-- Home-Based Daily VMT Spillover (.csv file)
-- Destination Daily VMT Spillover (.csv file)
-- OD Summary Spillover (.csv file)
-
 
 **In development**: a .Rmd file in R which, through the use of 'reticulate', merges the R and Python scripts.
 _________
@@ -91,7 +65,4 @@ Inputs:
 Outputs:
  - NHB VMT spillover (.csv file)
 __________
-
-Pipeline is done! Move outputs from every step (i.e. Output/{state} folder) to Drive. 
-
 
