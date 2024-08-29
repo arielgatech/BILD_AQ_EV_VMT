@@ -26,11 +26,12 @@ total_start_time = time.time()
 
 # define scenario variables
 region_code = 'WECC'
-analysis_years = [2018, 2030]
-align_scenarios = {'nevi-base': 'NEVI only', 
-                   'base-base': 'Baseline', 
-                   'base-ira': 'IRA only',
-                   'nevi-ira': 'NEVI and IRA'}
+analysis_years = [2018, 2030, 2040]
+align_scenarios = {
+    # 'base-nevi': 'NEVI only', 
+    #                'base-base': 'Baseline', 
+                   'ira-base': 'Baseline',
+                   'ira-nevi': 'NEVI'}
 
 # load all TEMPO data
 input_dir = os.path.join('input', region_code, 'TEMPO')
@@ -38,8 +39,9 @@ list_of_states = os.listdir(input_dir)
 
 tempo_result = None
 
+to_exlude = ['.DS_Store', 'V1_FEB2024', 'V2_APR2024']
 for state in list_of_states:
-    if state == '.DS_Store':
+    if state in to_exlude:
         continue
     print(state)
     
@@ -53,7 +55,9 @@ for state in list_of_states:
 # state_name = 'CA'
 
 tempo_result['Scenario'] = tempo_result['Scenario'].astype(str)
-tempo_result['Scenario'] = tempo_result['Scenario'].apply(lambda x: align_scenarios[x])
+print(tempo_result['Scenario'].unique())
+tempo_result['Scenario'] = tempo_result['Scenario'].map(align_scenarios)
+print(tempo_result['Scenario'].unique())
 # print(tempo_result.Scenario.unique())
 
 # <codecell>
@@ -70,7 +74,7 @@ tempo_result_summary.to_csv('./Output/' + region_code + '/TEMPO_veh_count.csv', 
 # <codecell>
 # aggregate TEMPO results
 scenarios = tempo_result['Scenario'].unique()
-
+navigat_sce_map = {'Baseline': 'baseline', 'NEVI': 'scenario'}
 for analysis_year in analysis_years:
     year_start_time = time.time()
     output_name = region_code + '_' + str(analysis_year)
@@ -124,11 +128,11 @@ for analysis_year in analysis_years:
         # Add VMT file processes
         VMT_output_by_scenario = None
         for state in list_of_states:
-            if state == '.DS_Store':
+            if state in to_exlude:
                 continue
             print(state)
             vmt_input_dir = os.path.join('input', region_code, 'NAVIGAT')
-            vmt_file_name = 'VMT_' + state + '_' + str(analysis_year) + '_' + scenario_name + '.csv'
+            vmt_file_name = 'VMT_' + state + '_' + str(analysis_year) + '_' + navigat_sce_map[scenario_name] + '.csv'
             vmt_output_by_state = read_csv(os.path.join(vmt_input_dir, state, vmt_file_name))
             vmt_output_by_state.loc[:, 'State'] = state
             VMT_output_by_scenario = pd.concat([VMT_output_by_scenario, vmt_output_by_state])

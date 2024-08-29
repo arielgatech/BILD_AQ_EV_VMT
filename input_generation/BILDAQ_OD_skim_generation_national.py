@@ -40,8 +40,8 @@ all_states = microtype_label_short.st_code.unique()
 
 processed_states = ['CA', 'TX', 'WA', 'OR', 'AZ', 'NY', 'IL']
 for selected_state in all_states:
-    if selected_state in processed_states:
-        continue
+    # if selected_state in processed_states:
+    #     continue
     print('processing results from ' + selected_state)
 # microtype_label_short.head(5)
     os.chdir(work_dir)
@@ -207,6 +207,6 @@ for selected_state in all_states:
     dist_and_time_matrix_out = pd.concat([dist_and_time_matrix_to_fill, 
                                           dist_and_time_matrix_train])
     print(sum(dist_and_time_matrix_out.isna().any(axis=1)))
-    dist_and_time_matrix_out.to_csv('Network/' + selected_state + '/travel_time_skim.csv',
+    dist_and_time_matrix_out.to_csv('Network/' + selected_state + '/travel_time_skim_' + selected_state + '.csv',
                                     index = False)
     # break
